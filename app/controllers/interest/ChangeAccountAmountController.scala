@@ -62,7 +62,7 @@ class ChangeAccountAmountController @Inject()(
     val interestPriorSubmissionSession = getSessionData[InterestPriorSubmission](SessionValues.INTEREST_PRIOR_SUB)
     val checkYourAnswerSession = getSessionData[InterestCYAModel](SessionValues.INTEREST_CYA)
 
-    val preAmount = extractPreAmount(taxType, checkYourAnswerSession, accountId)
+    val preAmount: Option[BigDecimal] = extractPreAmount(taxType, checkYourAnswerSession, accountId)
 
     val singleAccount: Option[InterestAccountModel] = interestPriorSubmissionSession.flatMap { unwrappedPrior =>
       unwrappedPrior.submissions.flatMap { unwrappedAccounts =>
@@ -74,7 +74,9 @@ class ChangeAccountAmountController @Inject()(
 
     (singleAccount, checkYourAnswerSession) match {
       case (None, Some(_)) => Redirect(controllers.interest.routes.AccountsController.show(taxYear, taxType))
-      case (Some(accountModel), Some(_)) => Ok(view(PriorOrNewAmountForm.priorOrNewAmountForm(accountModel.amount), accountModel, taxYear, taxType, accountId, preAmount))
+      case (Some(accountModel), Some(_)) => Ok(view(PriorOrNewAmountForm.priorOrNewAmountForm(accountModel.amount).fill(
+        PriorOrNewAmountModel(accountModel.amount,preAmount)
+      ), accountModel, taxYear, taxType, accountId, preAmount))
       case _ => Redirect(appConfig.incomeTaxSubmissionOverviewUrl(taxYear))
     }
   }
@@ -99,16 +101,13 @@ class ChangeAccountAmountController @Inject()(
             formWithErrors => BadRequest(view(formWithErrors, account, taxYear, taxType, accountId, preAmount))
           }, {
             formModel =>
-              import PriorOrNewAmountModel._
-              formModel.whichAmount match {
-                case `prior` =>
-                  val updatedAccounts = updateAccounts(taxType, cyaData, accountId, account.amount)
+              formModel.amount match {
+                case Some(value) => val updatedAccounts = updateAccounts(taxType, cyaData, accountId, value)
                   val updatedCYA = replaceAccounts(taxType, cyaData, updatedAccounts)
                   Redirect(controllers.interest.routes.AccountsController.show(taxYear, taxType)).addingToSession(
                     SessionValues.INTEREST_CYA -> updatedCYA.asJsonString
                   )
-                case `other` =>
-                  val updatedAccounts = updateAccounts(taxType, cyaData, accountId, formModel.amount.get)
+                case None => val updatedAccounts = updateAccounts(taxType, cyaData, accountId, account.amount)
                   val updatedCYA = replaceAccounts(taxType, cyaData, updatedAccounts)
                   Redirect(controllers.interest.routes.AccountsController.show(taxYear, taxType)).addingToSession(
                     SessionValues.INTEREST_CYA -> updatedCYA.asJsonString

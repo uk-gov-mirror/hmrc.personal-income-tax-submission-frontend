@@ -60,15 +60,13 @@ class OtherUkDividendsAmountController @Inject()(
     val checkYourAnswerSession = getSessionData[DividendsCheckYourAnswersModel](SessionValues.DIVIDENDS_CYA)
 
     (dividendsPriorSubmissionSession, checkYourAnswerSession) match {
-      case (Some(prior), Some(cya)) if prior.otherUkDividends.nonEmpty =>
-        Ok(view(
-          Left(PriorOrNewAmountForm.priorOrNewAmountForm(prior.otherUkDividends.get)),
-          Some(prior),
-          taxYear,
-          cya.otherUkDividendsAmount
-        ))
-      case (Some(prior), None) if prior.otherUkDividends.nonEmpty =>
-        Ok(view(Left(PriorOrNewAmountForm.priorOrNewAmountForm(prior.otherUkDividends.get)), Some(prior), taxYear))
+      case (Some(prior@DividendsPriorSubmission(_, Some(otherUkDividends))), Some(cya)) =>
+        Ok(view(Left(PriorOrNewAmountForm.priorOrNewAmountForm(otherUkDividends).fill(
+          PriorOrNewAmountModel(otherUkDividends,cya.otherUkDividendsAmount))),
+          Some(prior), taxYear, cya.otherUkDividendsAmount))
+      case (Some(prior@DividendsPriorSubmission(_, Some(otherUkDividends))), None) =>
+        Ok(view(Left(PriorOrNewAmountForm.priorOrNewAmountForm(otherUkDividends).fill(
+          PriorOrNewAmountModel(otherUkDividends,None))), Some(prior), taxYear))
       case (None, Some(cya)) =>
         Ok(view(Right(OtherDividendsAmountForm.otherDividendsAmountForm()), taxYear = taxYear, preAmount = cya.otherUkDividendsAmount))
       case _ =>
@@ -95,14 +93,11 @@ class OtherUkDividendsAmountController @Inject()(
                 Redirect(appConfig.incomeTaxSubmissionOverviewUrl(taxYear))
               } {
                 cyaModel =>
-                  import PriorOrNewAmountModel._
-                  formModel.whichAmount match {
-                    case `prior` =>
-                      Redirect(controllers.dividends.routes.DividendsCYAController.show(taxYear))
-                        .addingToSession(SessionValues.DIVIDENDS_CYA -> cyaModel.copy(otherUkDividendsAmount = priorSubmission.otherUkDividends).asJsonString)
-                    case `other` =>
-                      Redirect(controllers.dividends.routes.DividendsCYAController.show(taxYear))
-                        .addingToSession(SessionValues.DIVIDENDS_CYA -> cyaModel.copy(otherUkDividendsAmount = formModel.amount).asJsonString)
+                  formModel.amount match {
+                    case Some(value) => Redirect(controllers.dividends.routes.DividendsCYAController.show(taxYear))
+                      .addingToSession(SessionValues.DIVIDENDS_CYA -> cyaModel.copy(otherUkDividendsAmount = Some(value)).asJsonString)
+                    case None => Redirect(controllers.dividends.routes.DividendsCYAController.show(taxYear))
+                      .addingToSession(SessionValues.DIVIDENDS_CYA -> cyaModel.copy(otherUkDividendsAmount = priorSubmission.otherUkDividends).asJsonString)
                   }
               }
           }

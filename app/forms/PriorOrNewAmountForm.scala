@@ -32,19 +32,20 @@ object PriorOrNewAmountForm {
 
   def stringFormatter(
                        currentAmount: BigDecimal
-                     )(implicit messages: Messages): Formatter[String] = new Formatter[String] {
+                     )(implicit messages: Messages): Formatter[BigDecimal] = new Formatter[BigDecimal] {
 
     val priorAmountId = "prior-amount"
 
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], String] = {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], BigDecimal] = {
       data.get(key) match {
-        case Some(stringValue) => Right(stringValue)
+        case Some(stringValue) => println(stringValue)
+          Right(BigDecimal(stringValue))
         case _ => Left(Seq(FormError(priorAmountId, messages("common.error.priorOrNewAmount.noRadioSelected", currentAmount))))
       }
     }
 
-    override def unbind(key: String, value: String): Map[String, String] = {
-      Map(key -> value)
+    override def unbind(key: String, value: BigDecimal): Map[String, String] = {
+      Map(key -> value.toString())
     }
   }
 

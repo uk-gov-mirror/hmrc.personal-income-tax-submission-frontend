@@ -16,7 +16,7 @@
 
 package models.formatHelpers
 
-case class PriorOrNewAmountModel(whichAmount: String, amount: Option[BigDecimal])
+case class PriorOrNewAmountModel(whichAmount: BigDecimal, amount: Option[BigDecimal])
 
 object PriorOrNewAmountModel {
   val prior = "prior"
