@@ -50,8 +50,8 @@ class UntaxedInterestAmountViewSpec extends ViewTest {
         lazy val view = untaxedInterestView(
           untaxedInterestForm,
           taxYear,
-          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear, id)
-        )(user, implicitly, mockAppConfig)
+          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear,id)
+        )(user,implicitly,mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
         val expectedTitle = "UK Interest - Register your income tax return with HMRC - Gov.UK"
