@@ -88,7 +88,7 @@ class UntaxedInterestViewSpec extends ViewTest {
 
     "correctly render with errors as an individual"  when {
 
-      "there are no form errors" which {
+      "there are form errors" which {
 
         lazy val view = untaxedInterestView("Did you receive any untaxed interest from the UK?",
           yesNoForm.copy(

@@ -50,8 +50,8 @@ class UntaxedInterestAmountViewSpec extends ViewTest {
         lazy val view = untaxedInterestView(
           untaxedInterestForm,
           taxYear,
-          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear,id)
-        )(user,implicitly,mockAppConfig)
+          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear, id)
+        )(user, implicitly, mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
         val expectedTitle = "UK Interest - Register your income tax return with HMRC - Gov.UK"
@@ -70,14 +70,15 @@ class UntaxedInterestAmountViewSpec extends ViewTest {
           elementText(h1Selector) shouldBe expectedH1
         }
       }
+      }
+    "Correctly render with errors" when {
 
-      "There are form errors" which {
-
+      "There is a form error for an empty amount" which {
         lazy val view = untaxedInterestView(
           untaxedInterestForm.copy(errors = Seq(FormError(untaxedAmount,
-          "interest.untaxed-uk-interest-amount.error.empty"))),
+            "interest.untaxed-uk-interest-amount.error.empty"))),
           taxYear,
-          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear,id)
+          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear, id)
         )(user, implicitly, mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
@@ -109,7 +110,84 @@ class UntaxedInterestAmountViewSpec extends ViewTest {
         "contains an error message" in {
           elementText(errorSummaryText) shouldBe expectedErrorText
         }
+      }
 
+      "There is a form error for an empty name" which {
+        lazy val view = untaxedInterestView(
+          untaxedInterestForm.copy(errors = Seq(FormError(untaxedAmount,
+            "interest.untaxed-uk-interest-name.error.empty"))),
+          taxYear,
+          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear, id)
+        )(user, implicitly, mockAppConfig)
+
+        implicit lazy val document: Document = Jsoup.parse(view.body)
+        val expectedTitle = "UK Interest - Register your income tax return with HMRC - Gov.UK"
+        val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
+        val expectedErrorTitle = "There is a problem"
+        val expectedErrorText = "Enter an account name"
+
+        "contains the document title" in {
+          document.title shouldBe expectedTitle
+        }
+
+        "contains the correct header caption" in {
+          elementText(captionSelector) shouldBe expectedCaption
+        }
+
+        "contains a continue button" in {
+          elementExist(continueButtonSelector) shouldBe true
+        }
+
+        "contains an error" in {
+          elementExist(errorSummarySelector) shouldBe true
+        }
+
+        "contain an error title" in {
+          elementText(errorSummaryTitle) shouldBe expectedErrorTitle
+        }
+
+        "contains an error message" in {
+          elementText(errorSummaryText) shouldBe expectedErrorText
+        }
+      }
+
+      "There is a form error for an invalid amount" which {
+        lazy val view = untaxedInterestView(
+          untaxedInterestForm.copy(errors = Seq(FormError(untaxedAmount,
+            "common.error.invalid_number"))),
+          taxYear,
+          controllers.interest.routes.UntaxedInterestAmountController.submit(taxYear, id)
+        )(user, implicitly, mockAppConfig)
+
+        implicit lazy val document: Document = Jsoup.parse(view.body)
+        val expectedTitle = "UK Interest - Register your income tax return with HMRC - Gov.UK"
+        val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
+        val expectedErrorTitle = "There is a problem"
+        val expectedErrorText = "Enter an amount using numbers 0 to 9"
+
+        "contains the document title" in {
+          document.title shouldBe expectedTitle
+        }
+
+        "contains the correct header caption" in {
+          elementText(captionSelector) shouldBe expectedCaption
+        }
+
+        "contains a continue button" in {
+          elementExist(continueButtonSelector) shouldBe true
+        }
+
+        "contains an error" in {
+          elementExist(errorSummarySelector) shouldBe true
+        }
+
+        "contain an error title" in {
+          elementText(errorSummaryTitle) shouldBe expectedErrorTitle
+        }
+
+        "contains an error message" in {
+          elementText(errorSummaryText) shouldBe expectedErrorText
+        }
       }
     }
   }
