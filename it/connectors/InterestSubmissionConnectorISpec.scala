@@ -16,11 +16,10 @@
 
 package connectors
 
+import models.httpResponses.ErrorResponse
 import models.interest.InterestSubmissionModel
-import models.{ApiErrorBodyModel, ApiErrorModel}
-import play.api.libs.json.Json
-import play.api.test.Helpers._
 import utils.IntegrationTest
+import play.api.test.Helpers.{BAD_REQUEST, NO_CONTENT, INTERNAL_SERVER_ERROR, CREATED}
 
 class InterestSubmissionConnectorISpec extends IntegrationTest {
 
@@ -56,7 +55,7 @@ class InterestSubmissionConnectorISpec extends IntegrationTest {
 
         val result = await(connector.submit(body, nino, taxYear, mtditid))
 
-        result shouldBe Left(ApiErrorModel(BAD_REQUEST, ApiErrorBodyModel.parsingError))
+        result shouldBe Left(ErrorResponse(BAD_REQUEST, "Bad request received from DES."))
       }
 
     }
@@ -64,50 +63,23 @@ class InterestSubmissionConnectorISpec extends IntegrationTest {
     "return an internal server error response" when {
 
       "one is retrieved from the endpoint" in {
-
-        val responseBody = Json.obj(
-          "code" -> "INTERNAL_SERVER_ERROR",
-          "reason" -> "there has been an error downstream"
-        )
-
-        stubPost(s"/income-tax-interest/income-tax/nino/$nino/sources\\?taxYear=$taxYear&mtditid=$mtditid", INTERNAL_SERVER_ERROR, responseBody.toString())
+        stubPost(s"/income-tax-interest/income-tax/nino/$nino/sources\\?taxYear=$taxYear&mtditid=$mtditid", INTERNAL_SERVER_ERROR, "{}")
 
         val result = await(connector.submit(body, nino, taxYear, mtditid))
 
-        result shouldBe Left(ApiErrorModel(INTERNAL_SERVER_ERROR, ApiErrorBodyModel("INTERNAL_SERVER_ERROR", "there has been an error downstream")))
+        result shouldBe Left(ErrorResponse(INTERNAL_SERVER_ERROR, "Internal server error returned from DES."))
       }
-    }
 
-    "return a service unavailable response" when {
-
-      "one is received from the endpoint" in {
-
-        val responseBody = Json.obj(
-          "code" -> "SERVICE_UNAVAILABLE",
-          "reason" -> "the service is currently unavailable"
-        )
-
-        stubPost(s"/income-tax-interest/income-tax/nino/$nino/sources\\?taxYear=$taxYear&mtditid=$mtditid", SERVICE_UNAVAILABLE, responseBody.toString())
-
-        val result = await(connector.submit(body, nino, taxYear, mtditid))
-
-        result shouldBe Left(ApiErrorModel(SERVICE_UNAVAILABLE, ApiErrorBodyModel("SERVICE_UNAVAILABLE", "the service is currently unavailable")))
-      }
     }
 
     "return an unexpected status error response" when {
 
-      val responseBody = Json.obj(
-        "code" -> "INTERNAL_SERVER_ERROR",
-        "reason" -> "Unexpected status returned from DES"
-      )
-
-      "the response is not being handled explicitly when returned from the endpoint" in {
-        stubPost(s"/income-tax-interest/income-tax/nino/$nino/sources\\?taxYear=$taxYear&mtditid=$mtditid", CREATED, responseBody.toString())
+      "a response the is not being handled explicitly is returned from the endpoint" in {
+        stubPost(s"/income-tax-interest/income-tax/nino/$nino/sources\\?taxYear=$taxYear&mtditid=$mtditid", CREATED, "{}")
 
         val result = await(connector.submit(body, nino, taxYear, mtditid))
 
-        result shouldBe Left(ApiErrorModel(INTERNAL_SERVER_ERROR, ApiErrorBodyModel("INTERNAL_SERVER_ERROR", "Unexpected status returned from DES")))
+        result shouldBe Left(ErrorResponse(CREATED, "Unexpected status returned from DES."))
       }
 
     }

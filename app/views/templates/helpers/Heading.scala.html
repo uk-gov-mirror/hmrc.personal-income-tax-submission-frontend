@@ -14,16 +14,15 @@
  * limitations under the License.
  *@
 
-@this()
+@import uk.gov.hmrc.hmrcfrontend.views.html.components._
 
-@(heading: String, subheading: Option[String], extraClasses: String = "", size: String = "l")(implicit messages: Messages)
+@this(hmrcPageHeading : HmrcPageHeading)
 
-<header class="hmrc-page-heading govuk-!-margin-0 @extraClasses">
+@(heading: String, subheading: String = "")
 
-    <h1 class="govuk-heading-@{size} govuk-!-margin-0">@messages(heading)</h1>
-    @subheading.map{ subheading =>
-        <span class="govuk-caption-@{size} hmrc-caption-xl">@messages(subheading)</span>
+<header class="hmrc-page-heading govuk-!-margin-0 govuk-!-margin-bottom-5">
+    <h1 class="govuk-heading-xl govuk-!-margin-0 govuk-!-margin-bottom-5">@heading</h1>
+    @if(subheading.nonEmpty){
+    <p class="govuk-caption-xl hmrc-caption-xl">@subheading</p>
     }
-
-
 </header>

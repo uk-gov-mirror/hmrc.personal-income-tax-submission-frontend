@@ -16,42 +16,17 @@
 
 package config
 
-import play.api.i18n.{I18nSupport, MessagesApi}
-import play.api.mvc.{Request, RequestHeader, Result}
+import javax.inject.{Inject, Singleton}
+import play.api.i18n.MessagesApi
+import play.api.mvc.Request
 import play.twirl.api.Html
 import uk.gov.hmrc.play.bootstrap.frontend.http.FrontendErrorHandler
-import views.html.templates.{InternalServerErrorTemplate, NotFoundTemplate, ServiceUnavailableTemplate}
-import play.api.mvc.Results._
-import play.api.http.Status._
-
-import javax.inject.{Inject, Singleton}
-import scala.concurrent.Future
+import views.html.templates.ErrorTemplate
 
 @Singleton
-class ErrorHandler @Inject()(internalServerErrorTemplate: InternalServerErrorTemplate,
-                             serviceUnavailableTemplate: ServiceUnavailableTemplate,
-                             val messagesApi: MessagesApi,
-                             notFoundTemplate: NotFoundTemplate)(implicit appConfig: AppConfig)
-    extends FrontendErrorHandler with I18nSupport {
+class ErrorHandler @Inject()(errorTemplate: ErrorTemplate, val messagesApi: MessagesApi)(implicit appConfig: AppConfig)
+    extends FrontendErrorHandler {
 
   override def standardErrorTemplate(pageTitle: String, heading: String, message: String)(implicit request: Request[_]): Html =
-    internalServerErrorTemplate()
-
-  override def notFoundTemplate(implicit request: Request[_]): Html = notFoundTemplate()
-
-  def handleError(status: Int)(implicit request: Request[_]): Result = {
-    status match {
-      case SERVICE_UNAVAILABLE => ServiceUnavailable(serviceUnavailableTemplate())
-      case _ => InternalServerError(internalServerErrorTemplate())
-    }
-  }
-
-  override def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] =
-    statusCode match {
-      case NOT_FOUND =>
-        Future.successful(NotFound(notFoundTemplate(request.withBody(""))))
-      case _ =>
-        Future.successful(InternalServerError(internalServerErrorTemplate()(request.withBody(""),request2Messages(request),appConfig)))
-    }
-
+    errorTemplate(pageTitle, heading, message)
 }

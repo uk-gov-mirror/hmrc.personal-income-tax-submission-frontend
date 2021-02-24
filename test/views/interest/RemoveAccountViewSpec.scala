@@ -17,7 +17,7 @@
 package views.interest
 
 import forms.YesNoForm
-
+import models.formatHelpers.YesNoModel
 import models.interest.InterestAccountModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -27,7 +27,7 @@ import views.html.interest.RemoveAccountView
 
 class RemoveAccountViewSpec extends ViewTest {
 
-  lazy val yesNoForm: Form[Boolean] = YesNoForm.yesNoForm("Select yes to remove this account")
+  lazy val yesNoForm: Form[YesNoModel] = YesNoForm.yesNoForm("Select yes to remove this account")
 
   lazy val removeAccountView: RemoveAccountView = app.injector.instanceOf[RemoveAccountView]
 
@@ -40,15 +40,13 @@ class RemoveAccountViewSpec extends ViewTest {
 
   val h1Selector = "h1"
   val captionSelector = ".govuk-caption-l"
-  val yesOptionSelector = "#value"
-  val noOptionSelector = "#value-no"
+  val yesOptionSelector = "#yes_no_yes"
+  val noOptionSelector = "#yes_no_no"
   val continueButtonSelector = "#continue"
 
   val errorSummarySelector = ".govuk-error-summary"
   val errorSummaryTitle = ".govuk-error-summary__title"
   val errorSummaryText = ".govuk-error-summary__body"
-
-  val expectedTitle = s"Are you sure you want to remove this account? - $serviceName - $govUkExtension"
 
   "Remove Account view" should {
 
@@ -56,6 +54,7 @@ class RemoveAccountViewSpec extends ViewTest {
       "There are no form errors " which {
         lazy val view = removeAccountView(yesNoForm, taxYear, UNTAXED, account)(user, implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
+        val expectedTitle = "Are you sure you want to remove this account? - Register your income tax return with HMRC - Gov.UK"
         val expectedH1 = "Are you sure you want to remove Monzo?"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
@@ -90,6 +89,7 @@ class RemoveAccountViewSpec extends ViewTest {
         )(user, implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Are you sure you want to remove this account? - Register your income tax return with HMRC - Gov.UK"
         val expectedH1 = "Are you sure you want to remove Monzo?"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
         val expectedErrorTitle = "There is a problem"
@@ -139,6 +139,7 @@ class RemoveAccountViewSpec extends ViewTest {
           yesNoForm, taxYear, UNTAXED, account)(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Are you sure you want to remove this account? - Register your income tax return with HMRC - Gov.UK"
         val expectedH1 = "Are you sure you want to remove Monzo?"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
@@ -176,6 +177,7 @@ class RemoveAccountViewSpec extends ViewTest {
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Are you sure you want to remove this account? - Register your income tax return with HMRC - Gov.UK"
         val expectedH1 = "Are you sure you want to remove Monzo?"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 

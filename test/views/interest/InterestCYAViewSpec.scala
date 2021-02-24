@@ -44,7 +44,7 @@ class InterestCYAViewSpec extends ViewTest {
 
     val questionSelector: Int => String = questionNumber => s".govuk-summary-list__row:nth-child($questionNumber) > .govuk-summary-list__key"
 
-    val questionAccountSelector: (Int, Int, Int) => String = (questionNumber, accountNumber, account) => s"#question-${questionNumber}-account-${account}:nth-child($accountNumber)"
+    val questionAccountSelector: (Int, Int) => String = (questionNumber, accountNumber) => s"#question${questionNumber}account:nth-child($accountNumber)"
 
     val questionChangeLinkSelector: Int => String = questionNumber => s"#main-content > div > div > dl > div:nth-child($questionNumber) " +
       s"> dd.govuk-summary-list__actions > a"
@@ -53,8 +53,8 @@ class InterestCYAViewSpec extends ViewTest {
   }
 
   object ExpectedResult {
+    val titleExpected = "Check your answers - Register your income tax return with HMRC - Gov.UK"
     val h1Expected = "Check your answers"
-    val titleExpected = s"$h1Expected - $serviceName - $govUkExtension"
     val captionExpected = "Interest for 06 April 2019 to 05 April 2020"
 
     val changeLinkExpected = "Change"
@@ -142,15 +142,15 @@ class InterestCYAViewSpec extends ViewTest {
         }
 
         "has the correct question 2 account text" in {
-          elementText(Selectors.questionAccountSelector(question2, account1, 1)) shouldBe ExpectedResult.untaxedInterestAccount1ExpectedTest
+          elementText(Selectors.questionAccountSelector(question2, account1)) shouldBe ExpectedResult.untaxedInterestAccount1ExpectedTest
         }
 
         "has the correct question 4 account 1 text" in {
-          elementText(Selectors.questionAccountSelector(question4, account1, 1)) shouldBe ExpectedResult.taxedInterestAccount1ExpectedTest
+          elementText(Selectors.questionAccountSelector(question4, account1)) shouldBe ExpectedResult.taxedInterestAccount1ExpectedTest
         }
 
         "has the correct question 4 account 2 text" in {
-          elementText(Selectors.questionAccountSelector(question4, account2, 2)) shouldBe ExpectedResult.taxedInterestAccount2ExpectedTest
+          elementText(Selectors.questionAccountSelector(question4, account2)) shouldBe ExpectedResult.taxedInterestAccount2ExpectedTest
         }
 
         "question 1 change link" should {

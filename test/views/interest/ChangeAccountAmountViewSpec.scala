@@ -41,18 +41,18 @@ class ChangeAccountAmountViewSpec extends ViewTest {
   val expectedUntaxedH1 = "Monzo untaxed interest earned"
   val expectedTaxedH1 = "Monzo taxed interest earned"
 
-  val expectedUntaxedTitle = s"Untaxed interest earned - $serviceName - $govUkExtension"
-  val expectedTaxedTitle = s"Taxed interest earned - $serviceName - $govUkExtension"
+  val expectedUntaxedTitle = "Untaxed interest earned - Register your income tax return with HMRC - Gov.UK"
+  val expectedTaxedTitle = "Taxed interest earned - Register your income tax return with HMRC - Gov.UK"
 
   val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
   val expectedErrorTitle = "There is a problem"
   val expectedErrorText = "Select £5000 or enter a different amount"
 
-  val priorAmountRadio = "#whichAmount"
-  val priorAmountRadioText = "#main-content > div > div > form > div > div > fieldset > div > div:nth-child(1) > label"
-  val newAmountRadio = "#otherAmount"
-  val newAmountInput = "#amount"
+  val priorAmountRadio = "#prior-amount"
+  val priorAmountRadioText = "#main-content > div > div > form > div > fieldset > div > div:nth-child(1) > label"
+  val newAmountRadio = "#other-amount"
+  val newAmountInput = "#other-amount-input"
 
   val account = InterestAccountModel(Some("qwerty"), "Monzo", 5000)
 
@@ -71,7 +71,7 @@ class ChangeAccountAmountViewSpec extends ViewTest {
         "there are no form errors" which {
 
           lazy val view = changeAccountAmountView(
-            priorOrNewAmountForm.fill(PriorOrNewAmountModel("other",None)),
+            priorOrNewAmountForm,
             testCall,
             taxYear,
             UNTAXED,
@@ -175,7 +175,7 @@ class ChangeAccountAmountViewSpec extends ViewTest {
         "there are no form errors" which {
 
           lazy val view = changeAccountAmountView(
-            priorOrNewAmountForm.fill(PriorOrNewAmountModel("other",None)),
+            priorOrNewAmountForm,
             testCall,
             taxYear,
             TAXED,

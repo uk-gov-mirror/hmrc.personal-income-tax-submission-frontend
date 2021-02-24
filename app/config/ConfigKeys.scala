@@ -21,5 +21,6 @@ object ConfigKeys {
   val signInContinueBaseUrl = "signIn.continueBaseUrl"
   val dividendsBaseUrl = "microservice.dividends.url"
   val incomeTaxSubmissionFrontend = "income-tax-submission-frontend.url"
+  val viewAndChangeBaseUrl = "view-and-change.baseUrl"
   val defaultTaxYear = "defaultTaxYear"
 }

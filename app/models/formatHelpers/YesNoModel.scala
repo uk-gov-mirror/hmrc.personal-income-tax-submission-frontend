@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-package models
+package models.formatHelpers
 
-case class ApiErrorModel(status: Int, body: ApiErrorBodyModel)
+case class YesNoModel(yesNoValue: String) {
+  def asBoolean: Boolean = if(yesNoValue == "yes") true else false
+}

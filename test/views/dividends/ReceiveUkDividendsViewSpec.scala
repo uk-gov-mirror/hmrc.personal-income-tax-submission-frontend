@@ -17,7 +17,7 @@
 package views.dividends
 
 import forms.YesNoForm
-
+import models.formatHelpers.YesNoModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.data.{Form, FormError}
@@ -26,26 +26,19 @@ import views.html.dividends.ReceiveUkDividendsView
 
 class ReceiveUkDividendsViewSpec extends ViewTest {
 
-  lazy val yesNoForm: Form[Boolean] = YesNoForm.yesNoForm("Select yes if dividends were received from the UK")
+  lazy val yesNoForm: Form[YesNoModel] = YesNoForm.yesNoForm("Select yes if dividends were received from the UK")
 
   lazy val receiveUkDividendsView: ReceiveUkDividendsView = app.injector.instanceOf[ReceiveUkDividendsView]
 
   val h1Selector = "h1"
   val captionSelector = ".govuk-caption-l"
-  val yesOptionSelector = "#value"
-  val noOptionSelector = "#value-no"
+  val yesOptionSelector = "#yes_no_yes"
+  val noOptionSelector = "#yes_no_no"
   val continueButtonSelector = "#continue"
 
   val errorSummarySelector = ".govuk-error-summary"
   val errorSummaryTitle = ".govuk-error-summary__title"
   val errorSummaryText = ".govuk-error-summary__body"
-
-  val taxYear = 2020
-  val expectedIndividualH1 = "Did you receive any dividends from companies in the UK?"
-  val expectedIndividualTitle = s"$expectedIndividualH1 - $serviceName - $govUkExtension"
-  val expectedAgentH1 = "Did your client receive any dividends from companies in the UK?"
-  val expectedAgentTitle = s"$expectedAgentH1 - $serviceName - $govUkExtension"
-  val expectedCaption = "Dividends for 06 April 2019 to 05 April 2020"
 
   "ReceivedDividendsView" should {
 
@@ -53,16 +46,19 @@ class ReceiveUkDividendsViewSpec extends ViewTest {
 
       "there are no form errors" which {
 
-        lazy val view = receiveUkDividendsView(
-          yesNoForm, taxYear)(user, implicitly, mockAppConfig)
+        lazy val view = receiveUkDividendsView("Some Title", yesNoForm, 2020)(user, implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Some Title"
+        val expectedH1 = "Did you receive any dividends from companies in the UK?"
+        val expectedCaption = "Dividends for 06 April 2019 to 05 April 2020"
+
         "contains the correct title" in {
-          document.title shouldBe expectedIndividualTitle
+          document.title shouldBe expectedTitle
         }
 
         "contain the correct h1" in {
-          elementText(h1Selector) shouldBe expectedIndividualH1
+          elementText(h1Selector) shouldBe expectedH1
         }
 
         "contains the correct header caption" in {
@@ -90,22 +86,27 @@ class ReceiveUkDividendsViewSpec extends ViewTest {
       "there are no form errors" which {
 
         lazy val view = receiveUkDividendsView(
+          "Some Title",
           yesNoForm.copy(
             errors = Seq(FormError("yes_no", "Select yes if dividends were received from the UK"))),
-          taxYear
+          2020
         )(user, implicitly, mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
+
+        val expectedTitle = "Some Title"
+        val expectedH1 = "Did you receive any dividends from companies in the UK?"
+        val expectedCaption = "Dividends for 06 April 2019 to 05 April 2020"
 
         val expectedErrorTitle = "There is a problem"
         val expectedErrorText = "Select yes if dividends were received from the UK"
 
         "contains the correct title" in {
-          document.title shouldBe expectedIndividualTitle
+          document.title shouldBe expectedTitle
         }
 
         "contain the correct h1" in {
-          elementText(h1Selector) shouldBe expectedIndividualH1
+          elementText(h1Selector) shouldBe expectedH1
         }
 
         "contains the correct header caption" in {
@@ -144,16 +145,19 @@ class ReceiveUkDividendsViewSpec extends ViewTest {
 
       "there are no form errors" which {
 
-        lazy val view = receiveUkDividendsView(
-          yesNoForm, taxYear)(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
+        lazy val view = receiveUkDividendsView("Some Title", yesNoForm, 2020)(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Some Title"
+        val expectedH1 = "Did your client receive any dividends from companies in the UK?"
+        val expectedCaption = "Dividends for 06 April 2019 to 05 April 2020"
+
         "contains the correct title" in {
-          document.title shouldBe expectedAgentTitle
+          document.title shouldBe expectedTitle
         }
 
         "contain the correct h1" in {
-          elementText(h1Selector) shouldBe expectedAgentH1
+          elementText(h1Selector) shouldBe expectedH1
         }
 
         "contains the correct header caption" in {
@@ -181,22 +185,27 @@ class ReceiveUkDividendsViewSpec extends ViewTest {
       "there is a form error" which {
 
         lazy val view = receiveUkDividendsView(
+          "Some Title",
           yesNoForm.copy(
             errors = Seq(FormError("yes_no", "Select yes if dividends were received from the UK"))),
-          taxYear
+          2020
         )(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
+
+        val expectedTitle = "Some Title"
+        val expectedH1 = "Did your client receive any dividends from companies in the UK?"
+        val expectedCaption = "Dividends for 06 April 2019 to 05 April 2020"
 
         val expectedErrorTitle = "There is a problem"
         val expectedErrorText = "Select yes if dividends were received from the UK"
 
         "contains the correct title" in {
-          document.title shouldBe expectedAgentTitle
+          document.title shouldBe expectedTitle
         }
 
         "contain the correct h1" in {
-          elementText(h1Selector) shouldBe expectedAgentH1
+          elementText(h1Selector) shouldBe expectedH1
         }
 
         "contains the correct header caption" in {

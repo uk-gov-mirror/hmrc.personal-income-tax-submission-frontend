@@ -16,33 +16,34 @@
 
 package forms
 
+import models.formatHelpers.YesNoModel
 import play.api.data.Forms._
 import play.api.data._
 import play.api.data.format.Formatter
 
 object YesNoForm {
 
-  val yesNo = "value"
-  val yes = "true"
-  val no = "false"
+  val yesNo = "yes_no"
+  val yes = "yes"
+  val no = "no"
 
-  def formatter(missingInputError: String): Formatter[Boolean] = new Formatter[Boolean] {
-    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], Boolean] = {
+  def formatter(missingInputError: String): Formatter[YesNoModel] = new Formatter[YesNoModel] {
+    override def bind(key: String, data: Map[String, String]): Either[Seq[FormError], YesNoModel] = {
       data.get(key) match {
-        case Some(`yes`) => Right(true)
-        case Some(`no`) => Right(false)
+        case Some(`yes`) => Right(YesNoModel(yes))
+        case Some(`no`) => Right(YesNoModel(no))
         case _ => Left(Seq(FormError(key, missingInputError)))
       }
     }
 
-    override def unbind(key: String, value: Boolean): Map[String, String] = {
+    override def unbind(key: String, value: YesNoModel): Map[String, String] = {
       Map(
-        key -> value.toString
+        key -> value.yesNoValue
       )
     }
   }
 
-  def yesNoForm(missingInputError: String): Form[Boolean] = Form(
+  def yesNoForm(missingInputError: String): Form[YesNoModel] = Form(
     single(
       yesNo -> of(formatter(missingInputError))
     )

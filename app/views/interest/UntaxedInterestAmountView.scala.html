@@ -19,47 +19,55 @@
 @import play.api.i18n.Messages
 @import play.api.mvc.Request
 @import views.html.headerFooterTemplate.Layout
-@import views.html.templates.helpers.{Button, ErrorSummary, InputText, Heading}
+@import views.html.templates.helpers.{ContinueButton, ErrorSummaryDisplay, InputHelper, NameInputHelper, InputText}
 
 @this(
    layout: Layout,
-   errorSummary: ErrorSummary,
+   errorSummaryDisplay: ErrorSummaryDisplay,
    formWithCsrf: FormWithCSRF,
-   inputText: InputText,
-   button: Button,
-   heading: Heading
+   inputHelper: InputHelper,
+   nameInputHelper: NameInputHelper,
+   inputText: InputText
 )
 
 @(form: Form[UntaxedInterestModel], taxYear: Int, postAction: Call)(implicit request: Request[_], messages: Messages, appConfig: AppConfig)
 
-@layout(messages("interest.untaxed-uk-interest-details.title"), taxYear = Some(taxYear)) {
-    @formWithCsrf(action = postAction) {
+@heading = {
+    <span class="govuk-caption-l">@messages("interest.caption", (taxYear - 1).toString, taxYear.toString)</span>
+    <h1 class="govuk-heading-l govuk-!-margin-bottom-4">@messages("interest.untaxed-uk-interest-details.heading")</h1>
+}
 
-        @errorSummary(form.errors.distinct)
+@currencyFormHtml(formInput: Form[UntaxedInterestModel], untaxedAccountName: String, untaxedAmount: String) = {
+@errorSummaryDisplay(formInput.errors.distinct)
 
-        @heading("interest.untaxed-uk-interest-details.heading", Some(messages("interest.caption", (taxYear - 1).toString, taxYear.toString)), "govuk-!-margin-bottom-5")
+@heading
 
-        @inputText(
-            form,
-            id = "untaxedAccountName",
-            name = "untaxedAccountName",
-            label = "interest.untaxed-uk-interest-details.sub-heading1",
-            isPageHeading = false,
-            classes = Some("govuk-input--width-20"),
-            labelClasses = Some("govuk-!-font-weight-bold")
-        )
+@inputText(
+  form,
+  id = "untaxedAccountName",
+  name = "untaxedAccountName",
+  label = "interest.untaxed-uk-interest-details.sub-heading1",
+  isPageHeading = false,
+  classes = Some("govuk-input--width-20"),
+  labelClasses = Some("govuk-!-font-weight-bold")
+)
 
-        @inputText(
-            form,
-            id = "untaxedAmount",
-            name = "untaxedAmount",
-            label = "interest.untaxed-uk-interest-details.sub-heading2",
-            isPageHeading = false,
-            currency = true,
-            labelClasses = Some("govuk-!-font-weight-bold")
-        )
+@inputText(
+  form,
+  id = "untaxedAmount",
+  name = "untaxedAmount",
+  label = "interest.untaxed-uk-interest-details.sub-heading2",
+  isPageHeading = false,
+  currency = true,
+  labelClasses = Some("govuk-!-font-weight-bold")
+)
 
-        @button()
-    }
+}
+
+@layout(Some(messages("interest.untaxed-uk-interest-details.title")), taxYear = Some(taxYear)) {
+ @formWithCsrf(action = postAction) {
+  @currencyFormHtml(form, untaxedAccountName, untaxedAmount)
+  @ContinueButton()
+ }
 }
 

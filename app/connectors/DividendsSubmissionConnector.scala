@@ -18,7 +18,7 @@ package connectors
 
 
 import config.AppConfig
-import connectors.httpparsers.DividendsSubmissionHttpParser._
+import connectors.httpparsers.DividendsSubmissionHttpParser.DividendsSubmissionsResponse
 import javax.inject.Inject
 import models.DividendsSubmissionModel
 import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}

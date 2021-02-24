@@ -17,7 +17,7 @@
 package views.interest
 
 import forms.YesNoForm
-
+import models.formatHelpers.YesNoModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import play.api.data.{Form, FormError}
@@ -26,15 +26,14 @@ import views.html.interest.TaxedInterestView
 
 class TaxedInterestViewSpec extends ViewTest {
 
-  lazy val yesNoForm: Form[Boolean] = YesNoForm.yesNoForm("Select yes if you received taxed interest from the UK")
+  lazy val yesNoForm: Form[YesNoModel] = YesNoForm.yesNoForm("Select yes if you received taxed interest from the UK")
 
   lazy val taxedInterestView: TaxedInterestView = app.injector.instanceOf[TaxedInterestView]
-  val taxYear = 2020
 
   val h1Selector = "h1"
   val captionSelector = ".govuk-caption-l"
-  val yesOptionSelector = "#value"
-  val noOptionSelector = "#value-no"
+  val yesOptionSelector = "#yes_no_yes"
+  val noOptionSelector = "#yes_no_no"
   val continueButtonSelector = "#continue"
 
   val errorSummarySelector = ".govuk-error-summary"
@@ -45,11 +44,10 @@ class TaxedInterestViewSpec extends ViewTest {
     
     "Correctly render as an individual" when {
       "There are no form errors " which {
-        lazy val view = taxedInterestView(
-          yesNoForm, taxYear)(user, implicitly, mockAppConfig)
+        lazy val view = taxedInterestView("Did you receive any taxed interest from the UK?", yesNoForm, 2020)(user, implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
+        val expectedTitle = "Did you receive any taxed interest from the UK?"
         val expectedH1 = "Did you receive any taxed interest from the UK?"
-        val expectedTitle = s"$expectedH1 - $serviceName - $govUkExtension"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
         "Contains the correct title" in {
@@ -77,14 +75,15 @@ class TaxedInterestViewSpec extends ViewTest {
     "correctly render with errors as an individual" when {
       "there are no form errors" which {
         lazy val view = taxedInterestView(
+          "Did you receive any taxed interest from the UK?",
           yesNoForm.copy(
             errors = Seq(FormError("yes_no", "Select yes if you received taxed interest from the UK"))),
-          taxYear
+          2020
         )(user, implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Did you receive any taxed interest from the UK?"
         val expectedH1 = "Did you receive any taxed interest from the UK?"
-        val expectedTitle = s"$expectedH1 - $serviceName - $govUkExtension"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
         val expectedErrorTitle = "There is a problem"
         val expectedErrorText = "Select yes if you received taxed interest from the UK"
@@ -130,11 +129,11 @@ class TaxedInterestViewSpec extends ViewTest {
       "there are no form errors" which {
 
         lazy val view = taxedInterestView(
-          yesNoForm, taxYear)(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
+          "Did your client receive any taxed interest from the UK?", yesNoForm, 2020)(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Did your client receive any taxed interest from the UK?"
         val expectedH1 = "Did your client receive any taxed interest from the UK?"
-        val expectedTitle = s"$expectedH1 - $serviceName - $govUkExtension"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
         "contains the correct title" in {
@@ -164,16 +163,16 @@ class TaxedInterestViewSpec extends ViewTest {
     }
     "correctly render with errors as an agent" when {
       "there is a form error" which {
-        lazy val view = taxedInterestView(
+        lazy val view = taxedInterestView("Did your client receive any taxed interest from the UK?",
           yesNoForm.copy(
             errors = Seq(FormError("yes_no", "Select yes if you received taxed interest from the UK"))),
-          taxYear
+          2020
         )(user.copy(arn = Some("XARN1234567")), implicitly, mockAppConfig)
 
         implicit lazy val document: Document = Jsoup.parse(view.body)
 
+        val expectedTitle = "Did your client receive any taxed interest from the UK?"
         val expectedH1 = "Did your client receive any taxed interest from the UK?"
-        val expectedTitle = s"$expectedH1 - $serviceName - $govUkExtension"
         val expectedCaption = "Interest for 06 April 2019 to 05 April 2020"
 
         val expectedErrorTitle = "There is a problem"

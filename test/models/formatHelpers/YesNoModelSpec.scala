@@ -1,4 +1,4 @@
-@*
+/*
  * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +12,32 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *@
+ */
 
-@import uk.gov.hmrc.govukfrontend.views.html.components._
+package models.formatHelpers
 
-@this(govukButton : GovukButton)
+import utils.UnitTest
 
-@(alternativeText: String = "common.continue", classes: Option[String] = None)(implicit messages: Messages)
+class YesNoModelSpec extends UnitTest {
 
-@govukButton(Button(
-    attributes = Map("id" -> "continue"),
-    preventDoubleClick = true,
-    content = Text(messages(alternativeText)),
-    classes = classes.getOrElse("")
-))
+  ".asBoolean" should {
+
+    "convert the value into a boolean" when {
+
+      "the value is yes" in {
+
+        YesNoModel("yes").asBoolean shouldBe true
+
+      }
+
+      "the value is no" in {
+
+        YesNoModel("no").asBoolean shouldBe false
+
+      }
+
+    }
+
+  }
+
+}

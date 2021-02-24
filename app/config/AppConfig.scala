@@ -32,6 +32,8 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig) {
   lazy val signInUrl: String = s"$signInBaseUrl?continue=$signInContinueUrl&origin=$signInOrigin"
   lazy val dividendsBaseUrl: String = servicesConfig.baseUrl("income-tax-dividends") + "/income-tax-dividends"
   lazy val interestBaseUrl: String = servicesConfig.baseUrl("income-tax-interest") + "/income-tax-interest"
+  private lazy val vcBaseUrl: String = servicesConfig.getString(ConfigKeys.viewAndChangeBaseUrl)
+  def viewAndChangeViewUrlAgentRedirect = s"$vcBaseUrl/report-quarterly/income-and-expenses/view/agents/client-utr"
 
   lazy val defaultTaxYear: Int = servicesConfig.getInt(ConfigKeys.defaultTaxYear)
 
@@ -52,22 +54,9 @@ class AppConfig @Inject()(servicesConfig: ServicesConfig) {
 
   private def requestUri(implicit request: RequestHeader): String = SafeRedirectUrl(appUrl + request.uri).encodedUrl
 
-  private lazy val feedbackFrontendUrl = {
-    val feedbackSurveyUrl = servicesConfig.baseUrl("feedback-frontend")
-    servicesConfig.getConfString("feedback-frontend.relativeUrl", feedbackSurveyUrl)
-  }
-
-  lazy val feedbackSurveyUrl: String = s"$feedbackFrontendUrl/feedback/$contactFormServiceIdentifier"
-
-  def betaFeedbackUrl(implicit request: RequestHeader): String =
+  def feedbackUrl(implicit request: RequestHeader): String = {
     s"$contactFrontEndUrl/contact/beta-feedback?service=$contactFormServiceIdentifier&backUrl=$requestUri"
+  }
 
   lazy val contactUrl = s"$contactFrontEndUrl/contact/contact-hmrc?service=$contactFormServiceIdentifier"
-
-  private lazy val basGatewayUrl = {
-    val basGatewayUrl = servicesConfig.baseUrl("bas-gateway-frontend")
-    servicesConfig.getConfString("bas-gateway-frontend.relativeUrl", basGatewayUrl)
-  }
-
-  lazy val signOutUrl: String = s"$basGatewayUrl/bas-gateway/sign-out-without-state"
 }

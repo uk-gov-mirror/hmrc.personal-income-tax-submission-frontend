@@ -171,20 +171,10 @@ class RemoveAccountControllerISpec extends IntegrationTest{
     }
 
     s"return a BAD_REQUEST($BAD_REQUEST) status" in {
-
-      lazy val interestCYA = InterestCYAModel(
-        Some(true), Some(Seq(InterestAccountModel(Some("UntaxedId"), "Untaxed Account", 25))),
-        Some(true), Some(Seq(InterestAccountModel(Some("TaxedId"), "Taxed Account", 25)))
-      )
-      lazy val sessionCookie: String = PlaySessionCookieBaker.bakeSessionCookie(Map(
-        SessionValues.INTEREST_CYA -> Json.prettyPrint(Json.toJson(interestCYA))
-      ))
-
       lazy val result: WSResponse = {
         authoriseIndividual()
-        await(wsClient.url(s"$startUrl/2020/interest/remove-untaxed-interest-account?accountId=UntaxedId")
-          .withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck")
-          .post(Map[String,String]()))
+        await(wsClient.url(s"$startUrl/2020/interest/remove-untaxed-interest-account")
+          .post(Map[String, String]()))
       }
 
       result.status shouldBe BAD_REQUEST
@@ -222,19 +212,9 @@ class RemoveAccountControllerISpec extends IntegrationTest{
     }
 
     s"return a BAD_REQUEST($BAD_REQUEST) status" in {
-
-      lazy val interestCYA = InterestCYAModel(
-        Some(true), Some(Seq(InterestAccountModel(Some("UntaxedId"), "Untaxed Account", 25))),
-        Some(true), Some(Seq(InterestAccountModel(Some("TaxedId"), "Taxed Account", 25)))
-      )
-      lazy val sessionCookie: String = PlaySessionCookieBaker.bakeSessionCookie(Map(
-        SessionValues.INTEREST_CYA -> Json.prettyPrint(Json.toJson(interestCYA))
-      ))
-
       lazy val result: WSResponse = {
         authoriseIndividual()
-        await(wsClient.url(s"$startUrl/2020/interest/remove-taxed-interest-account?accountId=TaxedId")
-          .withHttpHeaders(HeaderNames.COOKIE -> sessionCookie, "Csrf-Token" -> "nocheck")
+        await(wsClient.url(s"$startUrl/2020/interest/remove-taxed-interest-account")
           .post(Map[String, String]()))
       }
 

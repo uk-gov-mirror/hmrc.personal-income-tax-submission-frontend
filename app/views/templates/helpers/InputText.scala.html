@@ -14,9 +14,7 @@
  * limitations under the License.
  *@
 
-@import views.html.templates.helpers.Heading
-
-@this(govukInput: GovukInput, heading: Heading)
+@this(govukInput: GovukInput)
 
 @(
     form: Form[_],
@@ -30,17 +28,15 @@
     labelClasses: Option[String] = None,
     autocomplete: Option[String] = None,
     inputType: String = "text",
-    currency: Boolean = false,
-    subheading: Option[String] = None,
-    headingClasses: String = ""
+    currency: Boolean = false
 )(implicit messages: Messages)
 
 @govukInput(Input(
     id,
     name,
-    classes = if(currency) "govuk-input--width-10 " + classes.fold("")(x => x) else classes.fold("")(x => x),
+    classes = if(currency) "govuk-input--width-5 " + classes.fold("")(x => x) else classes.fold("")(x => x),
     label = Label(
-        content = if(subheading.isDefined) HtmlContent(heading(messages(label, headingMessageArgs:_*), Some(subheading.get), headingClasses)) else Text(messages(label, headingMessageArgs:_*)),
+        content = Text(messages(label, headingMessageArgs:_*)),
         isPageHeading = isPageHeading,
         classes = if(isPageHeading) "govuk-label--xl " + labelClasses.fold("")(cls => cls) else labelClasses.fold("")(cls => cls)
     ),

@@ -28,18 +28,17 @@ class MockAppConfig extends MockFactory {
     override lazy val dividendsBaseUrl: String = "/dividends"
     override lazy val interestBaseUrl: String = "/interest"
 
-    override lazy val defaultTaxYear: Int = 2020
+    override lazy val defaultTaxYear: Int = 2021
 
     override def incomeTaxSubmissionOverviewUrl(taxYear: Int): String = "/overview"
     override def incomeTaxSubmissionStartUrl(taxYear: Int): String = "/start"
 
-    override lazy val feedbackSurveyUrl: String = "/feedbackUrl"
+    override def viewAndChangeViewUrlAgentRedirect: String = "/report-quarterly/income-and-expenses/view/agents/client-utr"
 
-    override def betaFeedbackUrl(implicit request: RequestHeader): String = "/feedbackUrl"
+
+    override def feedbackUrl(implicit request: RequestHeader): String = "feedbackUrl"
 
     override lazy val contactUrl: String = "/contact-frontend/contact"
-
-    override lazy val signOutUrl: String = "/sign-out-url"
   }
 }
 
