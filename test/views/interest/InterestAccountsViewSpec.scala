@@ -16,6 +16,7 @@
 
 package views.interest
 
+import forms.YesNoForm
 import models.interest.InterestAccountModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
@@ -31,13 +32,19 @@ class InterestAccountsViewSpec extends ViewTest {
   val TAXED = "taxed"
   val UNTAXED = "untaxed"
 
-  object Selectors {
-    val accountRow: Int => String = rowNumber => s".govuk-summary-list__row:nth-child($rowNumber)"
-    val accountRowName: Int => String = rowNumber => accountRow(rowNumber) + " > dd:nth-child(1)"
-    val accountRowChange: Int => String = rowNumber => accountRow(rowNumber) + " > dd:nth-child(2) > a"
-    val accountRowRemove: Int => String = rowNumber => accountRow(rowNumber) + " > dd:nth-child(3)"
+  private val untaxedYesNoForm =
+    YesNoForm.yesNoForm("Select yes if you received taxed interest from the UK").bind(Map("value" -> "true"))
+  private val taxedYesNoForm =
+    YesNoForm.yesNoForm("Select yes if you received untaxed interest from the UK").bind(Map("value" -> "true"))
 
-    val accountRowChangePriorSubmission: Int => String = rowNumber => accountRow(rowNumber) + " > dd:nth-child(3) > a"
+  object Selectors {
+    val accountRow: Int => String = rowNumber => s".govuk-form-group > ul > li:nth-child($rowNumber)"
+    val accountRowName: Int => String = rowNumber => accountRow(rowNumber) + " > span:nth-child(1)"
+    val accountRowChange: Int => String = rowNumber => accountRow(rowNumber) + " > span:nth-child(2) > a"
+    val accountRowRemove: Int => String = rowNumber => accountRow(rowNumber) + " > span:nth-child(3) > a"
+
+    val accountRowChangePriorSubmission: Int => String = rowNumber => accountRow(rowNumber) + " > span:nth-child(3) > a"
+    val accountRowRemovePriorSubmission: Int => String = rowNumber => accountRow(rowNumber) + " > span:nth-child(4) > a"
   }
 
   object ExpectedValues {
@@ -65,7 +72,7 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there is a single account passed in that is not a prior submission" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(untaxedYesNoForm, taxYear, Seq(
           InterestAccountModel(None, "Bank of UK", 9001.00, Some("qwerty"))
         ), UNTAXED)
         implicit val document: Document = Jsoup.parse(result.body)
@@ -94,7 +101,11 @@ class InterestAccountsViewSpec extends ViewTest {
         "the row should have a change link" which {
 
           "has the correct text" in {
-            elementText(Selectors.accountRowChange(1)) shouldBe ExpectedValues.change
+            elements(Selectors.accountRowChange(1)).get(0).child(0).text shouldBe ExpectedValues.change
+          }
+
+          "has the correct hidden text" in {
+            elements(Selectors.accountRowChange(1)).get(0).child(1).text shouldBe "Bank of UK account details"
           }
 
           "has the correct link" in {
@@ -107,11 +118,15 @@ class InterestAccountsViewSpec extends ViewTest {
         "the row should have a remove link" which {
 
           "has the correct text" in {
-            elementText(Selectors.accountRowRemove(1)) shouldBe ExpectedValues.remove
+            element(Selectors.accountRowRemove(1)).child(0).text shouldBe ExpectedValues.remove
+          }
+
+          "has the correct hidden text" in {
+            element(Selectors.accountRowRemove(1)).child(1).text shouldBe "Bank of UK"
           }
 
           "has the correct link" in {
-            element(Selectors.accountRowRemove(1) + "> a").attr("href") shouldBe
+            element(Selectors.accountRowRemove(1)).attr("href") shouldBe
               "/income-through-software/return/personal-income/2020/interest/remove-untaxed-interest-account?accountId=qwerty"
           }
         }
@@ -120,7 +135,7 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there is a single account passed in that is a prior submission" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(untaxedYesNoForm, taxYear, Seq(
           InterestAccountModel(Some("qwerty"), "Bank of UK", 9001.00)
         ), UNTAXED)
         implicit val document: Document = Jsoup.parse(result.body)
@@ -149,7 +164,11 @@ class InterestAccountsViewSpec extends ViewTest {
         "the row should have a change link" which {
 
           "has the correct text" in {
-            elementText(Selectors.accountRowChangePriorSubmission(1)) shouldBe ExpectedValues.change
+            elements(Selectors.accountRowChangePriorSubmission(1)).get(0).child(0).text shouldBe ExpectedValues.change
+          }
+
+          "has the correct hidden text" in {
+            elements(Selectors.accountRowChangePriorSubmission(1)).get(0).child(1).text shouldBe "Bank of UK account details"
           }
 
           "has the correct link" in {
@@ -167,9 +186,9 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there are two accounts passed in" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(untaxedYesNoForm, taxYear, Seq(
           InterestAccountModel(None, "Bank of UK", 9000.01, Some("qwerty")),
-          InterestAccountModel(Some("azerty"), "Bank of EU", 1234.56)
+          InterestAccountModel(Some("azerty"), "Bank of EU", 1234.56) // This is a prior submission
         ), UNTAXED)
         implicit val document: Document = Jsoup.parse(result.body)
 
@@ -199,7 +218,11 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a change link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowChange(1)) shouldBe ExpectedValues.change
+              elements(Selectors.accountRowChange(1)).get(0).child(0).text shouldBe ExpectedValues.change
+            }
+
+            "has the correct hidden text" in {
+              elements(Selectors.accountRowChange(1)).get(0).child(1).text shouldBe "Bank of UK account details"
             }
 
             "has the correct link" in {
@@ -212,17 +235,21 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a remove link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowRemove(1)) shouldBe ExpectedValues.remove
+              element(Selectors.accountRowRemove(1)).child(0).text shouldBe ExpectedValues.remove
+            }
+
+            "has the correct hidden text" in {
+              element(Selectors.accountRowRemove(1)).child(1).text shouldBe "Bank of UK"
             }
 
             "has the correct link" in {
-              element(Selectors.accountRowRemove(1) + "> a").attr("href") shouldBe
+              element(Selectors.accountRowRemove(1)).attr("href") shouldBe
                 "/income-through-software/return/personal-income/2020/interest/remove-untaxed-interest-account?accountId=qwerty"
             }
           }
         }
 
-        "the second row" should {
+        "the second row that is a prior submission" should {
           "have the correct account name" in {
             elementText(Selectors.accountRowName(2)) shouldBe "Bank of EU"
           }
@@ -230,7 +257,11 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a change link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowChangePriorSubmission(2)) shouldBe ExpectedValues.change
+              elements(Selectors.accountRowChangePriorSubmission(2)).get(0).child(0).text shouldBe ExpectedValues.change
+            }
+
+            "has the correct hidden text" in {
+              elements(Selectors.accountRowChangePriorSubmission(2)).get(0).child(1).text shouldBe "Bank of EU account details"
             }
 
             "has the correct link" in {
@@ -253,7 +284,7 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there is a single account passed in that is not a prior submission" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(taxedYesNoForm, taxYear, Seq(
           InterestAccountModel(None, "Bank of UK", 9001.00, Some("qwerty"))
         ), TAXED)
         implicit val document: Document = Jsoup.parse(result.body)
@@ -282,7 +313,11 @@ class InterestAccountsViewSpec extends ViewTest {
         "the row should have a change link" which {
 
           "has the correct text" in {
-            elementText(Selectors.accountRowChange(1)) shouldBe ExpectedValues.change
+            elements(Selectors.accountRowChange(1)).get(0).child(0).text shouldBe ExpectedValues.change
+          }
+
+          "has the correct hidden text" in {
+            elements(Selectors.accountRowChange(1)).get(0).child(1).text shouldBe "Bank of UK account details"
           }
 
           "has the correct link" in {
@@ -295,11 +330,15 @@ class InterestAccountsViewSpec extends ViewTest {
         "the row should have a remove link" which {
 
           "has the correct text" in {
-            elementText(Selectors.accountRowRemove(1)) shouldBe ExpectedValues.remove
+            element(Selectors.accountRowRemove(1)).child(0).text shouldBe ExpectedValues.remove
+          }
+
+          "has the correct hidden text" in {
+            element(Selectors.accountRowRemove(1)).child(1).text shouldBe "Bank of UK"
           }
 
           "has the correct link" in {
-            element(Selectors.accountRowRemove(1) + "> a").attr("href") shouldBe
+            element(Selectors.accountRowRemove(1)).attr("href") shouldBe
               "/income-through-software/return/personal-income/2020/interest/remove-taxed-interest-account?accountId=qwerty"
           }
         }
@@ -308,7 +347,7 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there is a single account passed in that is a prior submission" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(taxedYesNoForm, taxYear, Seq(
           InterestAccountModel(Some("qwerty"), "Bank of UK", 9001.00)
         ), TAXED)
         implicit val document: Document = Jsoup.parse(result.body)
@@ -335,14 +374,21 @@ class InterestAccountsViewSpec extends ViewTest {
         }
 
         "the row should have a change link" which {
-
           "has the correct text" in {
-            elementText(Selectors.accountRowChangePriorSubmission(1)) shouldBe ExpectedValues.change
+            elements(Selectors.accountRowChangePriorSubmission(1)).get(0).child(0).text shouldBe ExpectedValues.change
+          }
+
+          "has the correct hidden text" in {
+            elements(Selectors.accountRowChangePriorSubmission(1)).get(0).child(1).text shouldBe "Bank of UK account details"
           }
 
           "has the correct link" in {
             element(Selectors.accountRowChangePriorSubmission(1)).attr("href") shouldBe controllers.interest.routes.ChangeAccountAmountController
               .show(taxYear, "taxed", "qwerty").url
+          }
+
+          "the row should not have a remove link" in {
+            elementExist(Selectors.accountRowRemovePriorSubmission(1)) shouldBe false
           }
 
         }
@@ -355,7 +401,7 @@ class InterestAccountsViewSpec extends ViewTest {
 
       "there are two accounts passed in" which {
 
-        lazy val result = view(taxYear, Seq(
+        lazy val result = view(taxedYesNoForm, taxYear, Seq(
           InterestAccountModel(None, "Bank of UK", 9000.01, Some("qwerty")),
           InterestAccountModel(Some("azerty"), "Bank of EU", 1234.56)
         ), TAXED)
@@ -387,7 +433,11 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a change link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowChange(1)) shouldBe ExpectedValues.change
+              elements(Selectors.accountRowChange(1)).get(0).child(0).text shouldBe ExpectedValues.change
+            }
+
+            "has the correct hidden text" in {
+              elements(Selectors.accountRowChange(1)).get(0).child(1).text shouldBe "Bank of UK account details"
             }
 
             "has the correct link" in {
@@ -400,11 +450,15 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a remove link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowRemove(1)) shouldBe ExpectedValues.remove
+              elements(Selectors.accountRowRemove(1)).get(0).child(0).text shouldBe ExpectedValues.remove
+            }
+
+            "has the correct hidden text" in {
+              elements(Selectors.accountRowChange(1)).get(0).child(1).text shouldBe "Bank of UK account details"
             }
 
             "has the correct link" in {
-              element(Selectors.accountRowRemove(1) + "> a").attr("href") shouldBe
+              element(Selectors.accountRowRemove(1)).attr("href") shouldBe
                 "/income-through-software/return/personal-income/2020/interest/remove-taxed-interest-account?accountId=qwerty"
 
             }
@@ -419,7 +473,11 @@ class InterestAccountsViewSpec extends ViewTest {
           "the row should have a change link" which {
 
             "has the correct text" in {
-              elementText(Selectors.accountRowChangePriorSubmission(2)) shouldBe ExpectedValues.change
+              elements(Selectors.accountRowChangePriorSubmission(2)).get(0).child(0).text shouldBe ExpectedValues.change
+            }
+
+            "has the correct hidden text" in {
+              elements(Selectors.accountRowChangePriorSubmission(2)).get(0).child(1).text shouldBe "Bank of EU account details"
             }
 
             "has the correct link" in {

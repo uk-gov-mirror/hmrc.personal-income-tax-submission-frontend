@@ -16,7 +16,7 @@
 
 package controllers.interest
 
-import common.SessionValues
+import common.{SessionValues, UUID}
 import config.AppConfig
 import models.interest.{InterestAccountModel, InterestCYAModel}
 import play.api.libs.json.Json
@@ -37,7 +37,8 @@ class AccountsControllerTest extends IntegrationTest{
     new AccountsController(
       mcc,
       app.injector.instanceOf[InterestAccountsView],
-      authAction(stubbedRetrieval, acceptedConfidenceLevels)
+      authAction(stubbedRetrieval, acceptedConfidenceLevels),
+      app.injector.instanceOf[UUID]
     )
   }
 
