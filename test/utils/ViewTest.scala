@@ -80,9 +80,9 @@ trait ViewTest extends UnitTest with GuiceOneAppPerSuite {
     }
   }
 
-  def h1Check(header: String)(implicit document: Document): Unit = {
+  def h1Check(header: String, size: String = "l")(implicit document: Document): Unit = {
     s"have a page heading of '$header'" in {
-      document.select(".govuk-heading-l").text() shouldBe header
+      document.select(s".govuk-heading-$size").text() shouldBe header
     }
   }
 
@@ -92,13 +92,27 @@ trait ViewTest extends UnitTest with GuiceOneAppPerSuite {
     }
   }
 
+  def formGetLinkCheck(text: String, selector: String)(implicit document: Document): Unit = {
+    s"have a form with an GET action of '$text'" in {
+      document.select(selector).attr("action") shouldBe text
+      document.select(selector).attr("method") shouldBe "GET"
+    }
+  }
+
+  def formPostLinkCheck(text: String, selector: String)(implicit document: Document): Unit = {
+    s"have a form with an POST action of '$text'" in {
+      document.select(selector).attr("action") shouldBe text
+      document.select(selector).attr("method") shouldBe "POST"
+    }
+  }
+
   def buttonCheck(text: String, selector: String)(implicit document: Document): Unit = {
     s"have a $text button" which {
       s"has the text '$text'" in {
         document.select(selector).text() shouldBe text
       }
       s"has a class of govuk-button" in {
-        document.select(selector).attr("class") shouldBe "govuk-button"
+        document.select(selector).attr("class") should include ("govuk-button")
       }
     }
   }
